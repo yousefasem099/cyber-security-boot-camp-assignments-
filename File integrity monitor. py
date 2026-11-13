@@ -1,0 +1,67 @@
+
+import hashlib
+import json
+import time
+import os
+
+file_name = "sample.txt"
+baseline_file = "baseline.json"
+
+def get_hash(file_name):
+    sha = hashlib.sha256()
+
+    with open(file_name, "rb") as f:
+        while True:
+            data = f.read(4096)
+
+            if not data:
+                break
+
+            sha.update(data)
+
+    return sha.hexdigest()
+
+
+# Create or load baseline
+if os.path.exists(baseline_file):
+    with open(baseline_file, "r") as f:
+        baseline = json.load(f)
+else:
+    if not os.path.exists(file_name):
+        print("File not found!")
+        exit()
+
+    original_hash = get_hash(file_name)
+
+    baseline = {"hash": original_hash}
+
+    with open(baseline_file, "w") as f:
+        json.dump(baseline, f, indent=4)
+
+    print("Baseline created successfully.")
+
+original_hash = baseline["hash"]
+
+print("File monitoring started...")
+
+try:
+    while True:
+
+        if not os.path.exists(file_name):
+            print("CRITICAL ALERT: File was deleted!")
+
+        else:
+            current_hash = get_hash(file_name)
+
+            if current_hash != original_hash:
+                print("CRITICAL ALERT: File has been modified!")
+                print("Original Hash:", original_hash)
+                print("Current Hash:", current_hash)
+
+            else:
+                print("File is safe. No changes detected.")
+
+        time.sleep(3)
+
+except KeyboardInterrupt:
+    print("\nMonitoring stopped.")
