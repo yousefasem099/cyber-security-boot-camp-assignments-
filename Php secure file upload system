@@ -1,0 +1,103 @@
+
+<?php
+
+// Maximum allowed file size: 2 MB
+$maxSize = 2 * 1024 * 1024;
+
+// Allowed extensions and their real MIME types
+$allowedTypes = [
+    'jpg' => 'image/jpeg',
+    'png' => 'image/png',
+    'pdf' => 'application/pdf'
+];
+
+// Storage directory
+$uploadDir = __DIR__ . '/uploads/';
+
+// Check if the request is POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // Check if a file was uploaded
+    if (!isset($_FILES['uploaded_file'])) {
+        die("No file uploaded.");
+    }
+
+    $file = $_FILES['uploaded_file'];
+
+    // Check upload errors
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        die("File upload failed.");
+    }
+
+    // Check file size
+    if ($file['size'] > $maxSize || $file['size'] <= 0) {
+        die("Invalid file size. Maximum size is 2 MB.");
+    }
+
+    // Extract the file extension
+    $extension = strtolower(
+        pathinfo($file['name'], PATHINFO_EXTENSION)
+    );
+
+    // Check allowed extension
+    if (!array_key_exists($extension, $allowedTypes)) {
+        die("File extension is not allowed.");
+    }
+
+    // Inspect the actual MIME type
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mimeType = $finfo->file($file['tmp_name']);
+
+    // Compare extension with actual MIME type
+    if ($mimeType !== $allowedTypes[$extension]) {
+        die("File content does not match its extension.");
+    }
+
+    // Generate a secure random filename
+    $newFileName = bin2hex(random_bytes(16)) . '.' . $extension;
+
+    // Create the destination path
+    $destination = $uploadDir . $newFileName;
+
+    // Move the uploaded file to the storage directory
+    if (move_uploaded_file($file['tmp_name'], $destination)) {
+
+        // Set secure file permissions
+        chmod($destination, 0640);
+
+        echo "File uploaded successfully.";
+        echo "<br>New file name: " .
+             htmlspecialchars($newFileName, ENT_QUOTES, 'UTF-8');
+
+    } else {
+        die("Failed to save the uploaded file.");
+    }
+}
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Secure File Upload</title>
+</head>
+<body>
+
+    <h2>Secure File Upload</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+
+        <input
+            type="file"
+            name="uploaded_file"
+            accept=".jpg,.png,.pdf"
+            required
+        >
+
+        <button type="submit">Upload File</button>
+
+    </form>
+
+</body>
+</html>
