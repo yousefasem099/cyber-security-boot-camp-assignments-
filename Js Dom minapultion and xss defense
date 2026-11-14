@@ -1,0 +1,279 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOM XSS Protection Tool</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #101827;
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 30px 15px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: #38bdf8;
+            margin-bottom: 12px;
+        }
+
+        header p {
+            color: #aab7c7;
+            line-height: 1.6;
+        }
+
+        .panel {
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            background: #0f172a;
+            color: white;
+            font-size: 15px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: 2px solid #38bdf8;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        button {
+            flex: 1;
+            min-width: 150px;
+            padding: 13px;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .unsafe-btn {
+            background: #dc2626;
+            color: white;
+        }
+
+        .safe-btn {
+            background: #16a34a;
+            color: white;
+        }
+
+        .clear-btn {
+            background: #475569;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        .result {
+            background: #0f172a;
+            border: 1px solid #334155;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 100px;
+            margin-top: 15px;
+            overflow-wrap: anywhere;
+        }
+
+        .result h3 {
+            margin-bottom: 12px;
+        }
+
+        .unsafe-title {
+            color: #f87171;
+        }
+
+        .safe-title {
+            color: #4ade80;
+        }
+
+        .status {
+            margin-top: 15px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        footer {
+            text-align: center;
+            color: #64748b;
+            margin-top: 30px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 500px) {
+            .buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>DOM XSS Protection Tool</h1>
+        <p>
+            Demonstrating the difference between unsafe
+            innerHTML and secure textContent.
+        </p>
+    </header>
+
+    <div class="panel">
+
+        <label for="userInput">
+            Enter Your Input:
+        </label>
+
+        <textarea
+            id="userInput"
+            placeholder="Enter text or HTML payload here..."
+        ></textarea>
+
+        <div class="buttons">
+
+            <button
+                class="unsafe-btn"
+                onclick="showUnsafe()">
+                Unsafe Display
+            </button>
+
+            <button
+                class="safe-btn"
+                onclick="showSafe()">
+                Safe Display
+            </button>
+
+            <button
+                class="clear-btn"
+                onclick="clearResults()">
+                Clear
+            </button>
+
+        </div>
+
+        <p class="status">
+            Educational demonstration:
+            Test only in this local application.
+        </p>
+
+    </div>
+
+    <div class="panel">
+
+        <h3 class="unsafe-title">
+            1. Unsafe Output (innerHTML)
+        </h3>
+
+        <div id="unsafeResult" class="result">
+            Your unsafe output will appear here.
+        </div>
+
+    </div>
+
+    <div class="panel">
+
+        <h3 class="safe-title">
+            2. Safe Output (textContent)
+        </h3>
+
+        <div id="safeResult" class="result">
+            Your safe output will appear here.
+        </div>
+
+    </div>
+
+    <footer>
+        DOM XSS Demonstrator | JavaScript Security Assignment
+    </footer>
+
+</div>
+
+<script>
+
+    // Unsafe DOM manipulation
+    function showUnsafe() {
+
+        const input = document.getElementById("userInput").value;
+
+        const output = document.getElementById("unsafeResult");
+
+        // Vulnerable: Parses user input as HTML
+        output.innerHTML = input;
+
+    }
+
+
+    // Safe DOM manipulation
+    function showSafe() {
+
+        const input = document.getElementById("userInput").value;
+
+        const output = document.getElementById("safeResult");
+
+        // Secure: Treats user input as plain text
+        output.textContent = input;
+
+    }
+
+
+    // Clear all results
+    function clearResults() {
+
+        document.getElementById("userInput").value = "";
+
+        document.getElementById("unsafeResult").textContent =
+            "Your unsafe output will appear here.";
+
+        document.getElementById("safeResult").textContent =
+            "Your safe output will appear here.";
+
+    }
+
+</script>
+
+</body>
+</html>
